@@ -14,12 +14,6 @@
 		pub.timeoutDelay = 2000;
 		
 		
-		pub.event = function(fieldsObject) {
-			fieldsObject.hitType = 'event';
-			
-			return pub.send(fieldsObject);
-		};
-		
 		pub.pageView = function(fieldsObject) {
 			var callback;
 			
@@ -36,6 +30,12 @@
 					}
 				};
 			}
+			
+			return pub.send(fieldsObject);
+		};
+		
+		pub.event = function(fieldsObject) {
+			fieldsObject.hitType = 'event';
 			
 			return pub.send(fieldsObject);
 		};
@@ -114,10 +114,14 @@
 			var l            = Math.min(4, values.length);
 			
 			while (l--) {
-				fieldsObject[keys[l]] = values[l];
+				fieldsObject[keys[l]] = trim(values[l]);
 			}
 			
 			return fieldsObject;
+		};
+		
+		var trim = function(str) {
+			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/gi, '');
 		};
 		
 		var init = function() {
