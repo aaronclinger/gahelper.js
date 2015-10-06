@@ -1,1 +1,1 @@
-# ga-helper.js
+# GAHelper.js
