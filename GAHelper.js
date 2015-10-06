@@ -1,31 +1,26 @@
 /**
- * @author Aaron Clinger - https://github.com/aaronclinger/GAHelper.js
+ * @author Aaron Clinger - https://github.com/aaronclinger/gahelper.js
  */
-(function($, window) {
+(function($, window, document) {
 	'use strict';
 	
 	function GAHelper() {
 		var pub = {};
 		
 		pub.forceTry     = false;
-		pub.clearUTM     = false;
 		pub.timeoutDelay = 2000;
 		
-		pub.trackEvent = function(fieldsObject) {
+		
+		pub.event = function(fieldsObject) {
 			fieldsObject.hitType = 'event';
 			
-			/*
-			eventCategory
-			eventAction
-			eventLabel
-			eventValue
-			*/
-			
-			send(fieldsObject);
+			return send(fieldsObject);
 		};
 		
-		pub.trackPageView = function(fieldsObject) {
+		pub.pageView = function(fieldsObject) {
 			fieldsObject.hitType = 'pageview';
+			
+			//pub.clearUTM     = false;
 			
 			/*
 			title
@@ -33,12 +28,12 @@
 			page
 			*/
 			
-			send(fieldsObject);
+			return send(fieldsObject);
 		};
 		
-		pub.removeUTM = function() {
+		pub.clearUTM = function() {
 			var location = window.location.toString();
-			var hasPush  = (history && 'pushState' in history);
+			var hasPush  = history && 'pushState' in history;
 			
 			if (hasPush && location.indexOf('?') !== -1) {
 				location.replace(/utm_(?:source|medium|term|content|campaign)=[^\&]+\&*/ig, '');
@@ -46,14 +41,8 @@
 				
 				history.replaceState({}, '', location);
 			}
-		};
-		
-		pub.isPresent = function() {
-			return !! getGA();
-		};
-		
-		pub.isLoaded = function() {
-			return pub.isPresent() && getGA().hasOwnProperty('loaded') && getGA().loaded === true;
+			
+			return pub;
 		};
 		
 		pub.send = function(fieldsObject) {
@@ -98,14 +87,53 @@
 			} else if (fieldsObject.hitCallback) {
 				fieldsObject.hitCallback(false);
 			}
+			
+			return pub;
+		};
+		
+		pub.isPresent = function() {
+			return !! getGA();
+		};
+		
+		pub.isLoaded = function() {
+			return pub.isPresent() && getGA().hasOwnProperty('loaded') && getGA().loaded === true;
 		};
 		
 		var getGA = function() {
 			return window.ga;
 		};
 		
-		var init = function() {
+		var getEventFieldsFromAttr = function($el) {
+			var fieldsObject = {};
+			var values       = $el.data('track').split(',');
+			var keys         = ['eventCategory', 'eventAction', 'eventLabel', 'eventValue'];
+			var l            = Math.min(5, params.length);
 			
+			while (l--) {
+				fieldsObject[keys[l]] = values[l];
+			}
+			
+			return fieldsObject;
+		};
+		
+		var init = function() {
+			$(document).on('click', 'a[data-track]', function() {
+				var $this        = $(this);
+				var href         = $this.attr('href');
+				var target       = $this.attr('target');
+				var isBlank      = target && target.toLowerCase() === '_blank';
+				var fieldsObject = getEventFieldsFromAttr($this);
+				
+				if (href && ! isBlank) {
+					fieldsObject.hitCallback = function() {
+						document.location = href;
+					};
+				}
+				
+				pub.trackEvent(fieldsObject);
+				
+				return !! isBlank;
+			});
 		};
 		
 		init();
@@ -114,4 +142,4 @@
 	}
 	
 	window.GAHelper = new GAHelper();
-}(jQuery, window));
+}(jQuery, window, document));
