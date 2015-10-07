@@ -8,7 +8,8 @@
 	'use strict';
 	
 	function GAHelper() {
-		var pub = {};
+		var pub       = {};
+		var firstView = true;
 		
 		pub.forceTry     = false;
 		pub.timeoutDelay = 2000;
@@ -18,8 +19,9 @@
 			var callback;
 			
 			fieldsObject.hitType = 'pageview';
+			firstView            = false;
 			
-			if (fieldsObject.clearUTM) {
+			if (firstView && fieldsObject.clearUTM) {
 				callback = fieldsObject.hitCallback;
 				
 				fieldsObject.hitCallback = function(success) {
@@ -107,6 +109,10 @@
 			return window.ga;
 		};
 		
+		var trim = function(str) {
+			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/g, '');
+		};
+		
 		var getEventFieldsFromAttr = function($el) {
 			var fieldsObject = {};
 			var values       = $el.data('track').split(',');
@@ -118,10 +124,6 @@
 			}
 			
 			return fieldsObject;
-		};
-		
-		var trim = function(str) {
-			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/gi, '');
 		};
 		
 		var init = function() {

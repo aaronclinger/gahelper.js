@@ -47,7 +47,7 @@ Adds a new route. Only the first matched route will be triggered; routes are com
         * **object.id** (string) - The route identifier.
         * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
 
-## GAHelper.event(*fieldsObject*)
+### GAHelper.event(*fieldsObject*)
 
 Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
 
@@ -58,7 +58,7 @@ Adds a new route. Only the first matched route will be triggered; routes are com
         * **object.id** (string) - The route identifier.
         * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
 
-## GAHelper.send(*fieldsObject*)
+### GAHelper.send(*fieldsObject*)
 
 Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
 
@@ -69,17 +69,21 @@ Adds a new route. Only the first matched route will be triggered; routes are com
         * **object.id** (string) - The route identifier.
         * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
 
-## GAHelper.clearUTM()
+### GAHelper.clearUTM()
 
-Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
+Removes Google Analytics UTM parameters from the page URL using `history.replaceState`.
 
-## GAHelper.isDefined()
+`GAHelper` can also be configured to automatically remove UTM codes after the initial [GAHelper.pageView](#gahelperpageviewfieldsobject) has be fired.
 
-Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
+*Note: While removing UTM codes creates a visually cleaner URL, users who copy and share the browser URL will not get the UTM codes going forward. You will lose any measurement of share “spray” and the attribution to the original source. This may be desired, but should be considered before implementing.*
 
-## GAHelper.isLoaded()
+### GAHelper.isDefined()
 
-Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
+Determines if the Google Analytics base code and `ga` variable are present <code>true</code>, or unavailable <code>false</code>.
+
+### GAHelper.isLoaded()
+
+Determines if the Google Analytics asynchronous script has loaded <code>true</code>, or is unavailable or still loading <code>false</code>.
 
 ### data-track="*eventCategory, eventAction, [eventLabel], [eventValue]*"
 
@@ -92,7 +96,7 @@ Examples:
 ```html
 <ul>
 	<li><a href="/buy" data-track="footer,buy,ft_buy">Buy now</a></li>
-	<li><a href="https://www.google.com/maps" data-track="footer,exit_link,ft_map" target="_blank">Find our store</a></li>
+	<li><a href="https://www.google.com/maps" target="_blank" data-track="footer,exit_link,ft_map">Find our store</a></li>
 	<li><a href="mailto:example@example.com" data-track="footer,email,ft_email">Email us</a></li>
 </ul>
 ```
