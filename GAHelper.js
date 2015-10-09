@@ -10,14 +10,28 @@
 	function GAHelper() {
 		var pub       = {};
 		var firstView = true;
+		pub.forceTry  = false;
+		pub.timeout   = 2000;
 		
-		pub.forceTry     = false;
-		pub.timeoutDelay = 2000;
 		
+		pub.create = function(fieldsObject) {
+			if (typeof fieldsObject === 'string') {
+				fieldsObject = {
+					trackingId: fieldsObject
+				};
+			}
+			
+			fieldsObject.cookieDomain = fieldsObject.cookieDomain || 'auto';
+			
+			getGA()('create', fieldsObject);
+			
+			return pub;
+		};
 		
 		pub.pageView = function(fieldsObject) {
 			var callback;
 			
+			fieldsObject         = fieldsObject || {};
 			fieldsObject.hitType = 'pageview';
 			firstView            = false;
 			
@@ -46,7 +60,7 @@
 			var hasHit = false;
 			var callback;
 			var fallback;
-			var timeout;
+			var delay;
 			
 			if (fieldsObject.hitCallback) {
 				callback = fieldsObject.hitCallback;
@@ -58,20 +72,18 @@
 					
 					hasHit = true;
 					
-					clearTimeout(timeout);
+					clearTimeout(delay);
 					
-					if (callback) {
-						callback(success);
-					}
+					callback(success);
 				};
 				
 				fieldsObject.hitCallback = function() {
 					fallback(true);
 				};
 				
-				timeout = setTimeout(function() {
+				delay = setTimeout(function() {
 					fallback(false);
-				}, pub.timeoutDelay);
+				}, pub.timeout);
 			}
 			
 			if (pub.forceTry || pub.isLoaded() || pub.isDefined() && fieldsObject.hitType === 'pageview') {
@@ -127,7 +139,7 @@
 		};
 		
 		var init = function() {
-			$(document).on('click', 'a[data-track]', function() {
+			$(document).on('click', 'a[data-track]', function(e) {
 				var $this        = $(this);
 				var href         = $this.attr('href');
 				var target       = $this.attr('target');
@@ -135,23 +147,23 @@
 				var fieldsObject = getEventFieldsFromAttr($this);
 				
 				if (href && ! isBlank) {
+					e.preventDefault();
+					
 					fieldsObject.hitCallback = function() {
 						document.location = href;
 					};
 				}
 				
 				pub.trackEvent(fieldsObject);
-				
-				return !! isBlank;
 			});
 			
 			$('form[data-track]').each(function() {
 				var $this  = $(this);
 				var submit = false;
 				
-				$this.submit(function() {
+				$this.submit(function(e) {
 					if (submit === true) {
-						return true;
+						return;
 					}
 					
 					var fieldsObject = getEventFieldsFromAttr($this);
@@ -164,7 +176,7 @@
 					
 					pub.trackEvent(fieldsObject);
 					
-					return false;
+					e.preventDefault();
 				});
 			});
 		};
