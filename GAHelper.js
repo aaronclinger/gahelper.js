@@ -15,6 +15,10 @@
 		
 		
 		pub.create = function(fieldsObject) {
+			if ( ! pub.isDefined()) {
+				loadGA();
+			}
+			
 			if (typeof fieldsObject === 'string') {
 				fieldsObject = {
 					trackingId: fieldsObject
@@ -33,10 +37,10 @@
 			
 			fieldsObject         = fieldsObject || {};
 			fieldsObject.hitType = 'pageview';
-			firstView            = false;
 			
 			if (firstView && fieldsObject.clearUTM) {
-				callback = fieldsObject.hitCallback;
+				firstView = false;
+				callback  = fieldsObject.hitCallback;
 				
 				fieldsObject.hitCallback = function(success) {
 					pub.clearUTM();
@@ -117,6 +121,15 @@
 			return pub.isDefined() && getGA().hasOwnProperty('loaded') && getGA().loaded === true;
 		};
 		
+		var loadGA = function() {
+			/* jshint ignore:start */
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			/* jshint ignore:end */
+		};
+		
 		var getGA = function() {
 			return window.ga;
 		};
@@ -181,7 +194,11 @@
 			});
 		};
 		
-		init();
+		if ($) {
+			$(document).ready(function() {
+				init();
+			});
+		}
 		
 		return pub;
 	}
