@@ -1,12 +1,14 @@
-# GAHelper
+# GAHelper.js
 
-* Removes UTM
-* timeout for hitCallback
-* Ensures hitCallback works if GA is blocked
-* Can event track automatically via data attribute
-* Ensures events are recorded before pages are redirected
-* Can be mixed and matched with native GA functions
-* Can automatically include the GA base code if not present
+An utility which makes common tracking tasks with Google Analytics more reliable and less error-prone:
+
+* Ensures tracking features, such as `hitCallback`, work regardless if GA is loaded or is blocked by an ad blocker.
+* Automatically tracks events on elements with the data attribute `data-track` and attempts to register the hit before the page is redirected.
+* Can remove UTM parameters from from the URL after their values have registered.
+* `GAHelper` will include Google Analytics base code if it is not present on the page.
+* Includes a configurable timeout for the tracking hit to register before gracefully failing.
+* `GAHelper`’s methods can be mixed and matched with their native GA counterparts.
+
 
 ## Dependencies
 
@@ -26,6 +28,9 @@
 	...
 </head>
 ```
+```html
+<a href="/more" data-track="footer,more,ft_more">Learn more</a>
+```
 ```js
 $('#logo').click(function() {
 	GAHelper.event({
@@ -40,9 +45,6 @@ $('#logo').click(function() {
 	});
 });
 ```
-```html
-<a href="/buy" data-track="footer,buy,ft_buy">Buy now</a>
-```
 
 ## API
 
@@ -56,7 +58,7 @@ $('#logo').click(function() {
 
 ### <a id="create"></a>GAHelper.create(*trackingId* || *fieldsObject*)
 
-Creates a new tracker instance and will automatically include the Google Analytics base code if it is [not present](#is-defined) on the page. This method returns the instance of `GAHelper` to allow for chaining.
+Creates a new tracker instance and will include the Google Analytics base code if it is [not present](#is-defined) on the page. This method returns the instance of `GAHelper` to allow for method chaining.
 
 `GAHelper.create` requires either a `trackingId` or `fieldsObject`:
 
@@ -77,13 +79,13 @@ GAHelper.create({
 
 ### <a id="pageview"></a>GAHelper.pageview(*[fieldsObject]*)
 
-Sends a pageview hit to Google Analytics.
+Sends a pageview hit to Google Analytics. This method returns the instance of `GAHelper` to allow for method chaining.
 
 * **[fieldsObject]** `Object` - An optional [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference):
     * **[fieldsObject.title]** `String` - The optional title of the page.
     * **[fieldsObject.location]** `String` - The optional URL of the page being tracked.
     * **[fieldsObject.page]** `String` - The optional path portion of a URL. This value should start with a slash (/) character.
-    * **[fieldsObject.clearUTM]** `Boolean` - Specifies if the [UTM parameters](https://support.google.com/analytics/answer/1033863) should be removed from the URL after the page view has been recorded `true`, or not `false`; defaults to `false`. See [GAHelper.clearUTM](#clear-utm) for additional details.
+    * **[fieldsObject.clearUTM]** `Boolean` - Specifies if the [UTM parameters](https://support.google.com/analytics/answer/1033863) should be removed from the URL after the page view has been recorded `true`, or not `false`; defaults to `false`. See [`GAHelper.clearUTM`](#clear-utm) for additional details.
     * **[fieldsObject.hitCallback]** `Function` - The optional function that will be called after processing a hit. The callback function is passed a `Boolean` with the value of `true` if the hit was recorded, or `false` if the request timed out or was blocked.
 
 Example:
@@ -96,7 +98,7 @@ GAHelper.pageview({
 	clearUTM: true,
 	hitCallback: function(success) {
 		if ( ! success) {
-			console.log('GA page view failed to register, or GA was disabled by an ad blocker.');
+			console.log('Pageview failed to register, or GA was disabled by an ad blocker.');
 		}
 	}
 });
@@ -104,7 +106,7 @@ GAHelper.pageview({
 
 ### <a id="event"></a>GAHelper.event(*fieldsObject*)
 
-Sends an event hit to Google Analytics.
+Sends an event hit to Google Analytics. This method returns the instance of `GAHelper` to allow for method chaining.
 
 * **fieldsObject** `Object` - A [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference):
     * **fieldsObject.eventCategory** `String` - Specifies the event category.
@@ -121,7 +123,7 @@ Example:
 	eventAction: 'nav_home',
 	hitCallback: function(success) {
 		if ( ! success) {
-			console.log('GA event failed to register, or GA was disabled by an ad blocker.');
+			console.log('Event failed to register, or GA was disabled by an ad blocker.');
 		}
 	}
 });
@@ -129,30 +131,34 @@ Example:
 
 ### GAHelper.send(*fieldsObject*)
 
-Sends a hit to Google Analytics. Most likely you will want to use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track less frequently used `social` or `timing` hit types.
+Sends a hit to Google Analytics. Most likely you will want to use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track "social" or "timing" hit types. This method returns the instance of `GAHelper` to allow for method chaining.
 
-* **fieldsObject** `Object` - An object that defines the routes settings and callback function.
-    * **[fieldsObject.id]** `String` - An optional identifier that is passed to the `settings.callback` function. If undefined, the string provided for `settings.route` will be used as the identifier.
-    * **fieldsObject.route** `String` - The route pattern to match.
-    * **fieldsObject.callback** `Function` - A function that should be called when the route has been triggered. The callback function is passed an object with two properties:
-        * **object.id** `String` - The route identifier.
-        * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
-
+* **fieldsObject** `Object` - A [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference) that defines the hit type and fields.
 
 Example:
 ```js
 GAHelper.send({
-	hitType: 'social'
+	hitType: 'social',
+	socialNetwork: 'Facebook',
+	socialAction: 'like',
+	socialTarget: 'http://example.com',
+	hitCallback: function(success) {
+		if ( ! success) {
+			console.log('Hit failed to register, or GA was disabled by an ad blocker.');
+		}
+	}
 });
 ```
 
 ### <a id="clear-utm"></a>GAHelper.clearUTM()
 
-Removes Google Analytics [UTM parameters](https://support.google.com/analytics/answer/1033863) from the page URL using `history.replaceState`.
+Removes Google Analytics [UTM parameters](https://support.google.com/analytics/answer/1033863) from the URL using `history.replaceState`.
 
-`GAHelper` can also be configured to automatically remove UTM codes after the initial [GAHelper.pageview](#pageview) has been recorded.
+`GAHelper` can also be configured to automatically remove UTM codes after the initial [`GAHelper.pageview`](#pageview) has been recorded.
 
 While removing UTM codes creates a visually cleaner URL, visitors who copy and share the browser URL will not copy the UTM codes going forward. You will lose any measurement of share “spray” and the attribution to the original source. This may be desired, but should be considered before implementing.
+
+This method returns the instance of `GAHelper` to allow for method chaining.
 
 ### <a id="is-defined"></a>GAHelper.isDefined()
 
@@ -164,14 +170,18 @@ Determines if the Google Analytics asynchronous script has loaded `true`, or is 
 
 ### <a id="data-attribute"></a>data-track="*eventCategory, eventAction, [eventLabel], [eventValue]*"
 
-`GAHelper` will detect HTML elements with the data attribute `data-route` and automatically send the value to `GAHelper.event` when the element is clicked. `GAHelper` will ensure 
+`GAHelper` will detect `<a>` or `<form>` elements with the data attribute `data-track` and automatically send the defined value to `GAHelper.event` when the element is clicked or submitted. `GAHelper` will attempt to register the hit before the page is redirected.
 
-* **route** `String` - The route to send to `requestRoute`.
+* **track** `String` - A comma-separated `String` that defines the `event` hit. Whitespace before and after commas is trimmed and ignored.
+    * **eventCategory** `String` - Specifies the event category.
+    * **eventAction** `String` - Specifies the event action.
+    * **[eventLabel]** `String` - Specifies the optional event label.
+    * **[eventValue]** `Number` - Specifies the optional event value
 
 Example:
 ```html
 <ul>
-	<li><a href="/buy" data-track="footer,buy,ft_buy">Buy now</a></li>
+	<li><a href="/buy" data-track="footer, buy, ft_buy">Buy now</a></li>
 	<li><a href="https://www.google.com/maps" target="_blank" data-track="footer,exit_link,ft_map">Find our store</a></li>
 	<li><a href="mailto:example@example.com" data-track="footer,email,ft_email">Email us</a></li>
 </ul>
