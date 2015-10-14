@@ -11,7 +11,7 @@
 		var pub       = {};
 		var firstView = true;
 		pub.forceTry  = false;
-		pub.timeout   = 2000;
+		pub.timeout   = 3000;
 		
 		
 		pub.create = function(fieldsObject) {
@@ -32,7 +32,7 @@
 			return pub;
 		};
 		
-		pub.pageView = function(fieldsObject) {
+		pub.pageview = function(fieldsObject) {
 			var callback;
 			
 			fieldsObject         = fieldsObject || {};
