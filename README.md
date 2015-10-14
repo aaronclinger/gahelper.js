@@ -10,7 +10,7 @@
 
 ## Dependencies
 
-`GAHelper` requires the presence of [jQuery](http://jquery.com) for [data attribute event tracking](#data-attribute). If jQuery is not present, `GAHelper` will automatically disable the feature. If you do not wish to include jQuery in your project, but want data attribute event tracking, it should be fairly trivial to change the few dependences.
+`GAHelper` requires the presence of [jQuery](http://jquery.com) for [data attribute event tracking](#data-attribute). If jQuery is not present, `GAHelper` will automatically disable this feature. If you do not wish to include jQuery in your project, but want data attribute event tracking, it should be fairly trivial to change the few dependences.
 
 
 ## Example Usage
@@ -26,7 +26,6 @@
 	...
 </head>
 ```
-
 ```js
 $('#logo').click(function() {
 	GAHelper.event({
@@ -80,7 +79,7 @@ GAHelper.create({
 
 Sends a pageview hit to Google Analytics.
 
-* **[fieldsObject]** `Object` - An optional [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference) that defines the routes settings and callback function.
+* **[fieldsObject]** `Object` - An optional [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference):
     * **[fieldsObject.title]** `String` - The optional title of the page.
     * **[fieldsObject.location]** `String` - The optional URL of the page being tracked.
     * **[fieldsObject.page]** `String` - The optional path portion of a URL. This value should start with a slash (/) character.
@@ -107,7 +106,7 @@ GAHelper.pageview({
 
 Sends an event hit to Google Analytics.
 
-* **fieldsObject** `Object` - An object that defines the routes settings and callback function.
+* **fieldsObject** `Object` - A [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference):
     * **fieldsObject.eventCategory** `String` - Specifies the event category.
     * **fieldsObject.eventAction** `String` - Specifies the event action.
     * **[fieldsObject.eventLabel]** `String` - Specifies the optional event label.
@@ -130,7 +129,7 @@ Example:
 
 ### GAHelper.send(*fieldsObject*)
 
-Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `GAHelper`. This method returns the instance of `GAHelper` to allow for method chaining.
+Sends a hit to Google Analytics. Most likely you will want to use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track less frequently used `social` or `timing` hit types.
 
 * **fieldsObject** `Object` - An object that defines the routes settings and callback function.
     * **[fieldsObject.id]** `String` - An optional identifier that is passed to the `settings.callback` function. If undefined, the string provided for `settings.route` will be used as the identifier.
@@ -140,12 +139,10 @@ Adds a new route. Only the first matched route will be triggered; routes are com
         * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
 
 
-
-
 Example:
 ```js
 GAHelper.send({
-	
+	hitType: 'social'
 });
 ```
 
