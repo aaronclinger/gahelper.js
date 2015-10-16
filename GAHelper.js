@@ -38,17 +38,26 @@
 			fieldsObject         = fieldsObject || {};
 			fieldsObject.hitType = 'pageview';
 			
-			if (firstView && fieldsObject.clearUTM) {
-				firstView = false;
-				callback  = fieldsObject.hitCallback;
-				
-				fieldsObject.hitCallback = function(success) {
-					pub.clearUTM();
+			if ( ! fieldsObject.page && ! fieldsObject.location) {
+				getGA()('set', 'location', window.location.toString());
+				getGA()('set', 'page', window.location.pathname.toString());
+			}
+			
+			if (fieldsObject.clearUTM) {
+				if (firstView) {
+					firstView = false;
+					callback  = fieldsObject.hitCallback;
 					
-					if (callback) {
-						callback(success);
-					}
-				};
+					fieldsObject.hitCallback = function(success) {
+						pub.clearUTM();
+						
+						if (callback) {
+							callback(success);
+						}
+					};
+				}
+				
+				delete fieldsObject.clearUTM;
 			}
 			
 			return pub.send(fieldsObject);
@@ -100,14 +109,14 @@
 		};
 		
 		pub.clearUTM = function() {
-			var location = window.location.toString();
-			var hasPush  = history && 'pushState' in history;
+			var loc     = window.location.toString();
+			var hasPush = history && 'pushState' in history;
 			
-			if (hasPush && location.indexOf('?') !== -1) {
-				location.replace(/utm_(?:source|medium|term|content|campaign)=[^\&]+\&*/ig, '');
-				location.replace(/\?+$/ig, '');
+			if (hasPush && loc.indexOf('?') !== -1) {
+				loc = loc.replace(/utm_(?:source|medium|term|content|campaign)=[^\&]+\&*/ig, '');
+				loc = loc.replace(/(\?|\&)+$/g, '');
 				
-				history.replaceState({}, '', location);
+				history.replaceState({}, '', loc);
 			}
 			
 			return pub;
@@ -140,7 +149,8 @@
 		
 		var getEventFieldsFromAttr = function($el) {
 			var fieldsObject = {};
-			var values       = $el.data('track').split(',');
+			var attr         = $el.data('track') || $el.data('track-async');
+			var values       = attr.split(',');
 			var keys         = ['eventCategory', 'eventAction', 'eventLabel', 'eventValue'];
 			var l            = Math.min(4, values.length);
 			
@@ -152,22 +162,35 @@
 		};
 		
 		var init = function() {
-			$(document).on('click', 'a[data-track]', function(e) {
-				var $this        = $(this);
-				var href         = $this.attr('href');
-				var target       = $this.attr('target');
-				var isBlank      = target && target.toLowerCase() === '_blank';
-				var fieldsObject = getEventFieldsFromAttr($this);
+			var $doc = $(document);
+			
+			var async = function() {
+				pub.event(getEventFieldsFromAttr($(this)));
+			};
+			
+			var isForm = function($this) {
+				return $this.prop('tagName').toLowerCase() === 'form';
+			};
+			
+			$doc.on('click', '[data-track]', function(e) {
+				var $this = $(this);
 				
-				if (href && ! isBlank) {
-					e.preventDefault();
+				if ( ! isForm($this)) {
+					var href         = $this.attr('href');
+					var target       = $this.attr('target');
+					var isBlank      = target && target.toLowerCase() === '_blank';
+					var fieldsObject = getEventFieldsFromAttr($this);
 					
-					fieldsObject.hitCallback = function() {
-						document.location = href;
-					};
+					if (href && ! isBlank) {
+						e.preventDefault();
+						
+						fieldsObject.hitCallback = function() {
+							document.location = href;
+						};
+					}
+					
+					pub.event(fieldsObject);
 				}
-				
-				pub.trackEvent(fieldsObject);
 			});
 			
 			$('form[data-track]').each(function() {
@@ -187,10 +210,17 @@
 						$this.submit();
 					};
 					
-					pub.trackEvent(fieldsObject);
+					pub.event(fieldsObject);
 					
 					e.preventDefault();
 				});
+			});
+			
+			$doc.on('submit', 'form[data-track-async]', async);
+			$doc.on('click', '[data-track-async]', function() {
+				if ( ! isForm($(this))) {
+					async.call(this);
+				}
 			});
 		};
 		
