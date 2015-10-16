@@ -8,7 +8,7 @@ An utility which makes common tracking tasks with Google Analytics more reliable
 * `GAHelper` will include Google Analytics base code if it is not present on the page.
 * Includes a configurable timeout for the tracking hit to register before gracefully failing.
 * `GAHelper`’s methods can be mixed and matched with their native GA counterparts.
-* Automatically handles setting the `page` and `location` variables to ensure proper page tracking with [single page applications](https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications).
+* Handles setting `page` and `location` variables to ensure proper page tracking with [single page applications](https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications).
 
 
 ## Dependencies
