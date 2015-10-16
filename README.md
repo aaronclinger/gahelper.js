@@ -171,7 +171,7 @@ Determines if the Google Analytics asynchronous script has loaded `true`, or is 
 
 ### <a id="data-attribute"></a>data-track="*eventCategory, eventAction, [eventLabel], [eventValue]*"
 
-`GAHelper` will detect `<a>` or `<form>` elements with the data attribute `data-track` and automatically send the defined value to `GAHelper.event` when the element is clicked or submitted. `GAHelper` will attempt to register the hit before the page is redirected.
+`GAHelper` will detect elements with the data attribute `data-track` and automatically send the defined value to `GAHelper.event` when the element is clicked or the form is submitted. `GAHelper` will attempt to register the hit before the page is redirected.
 
 * **track** `String` - A comma-separated `String` that defines the `event` hit. Whitespace before and after commas is trimmed and ignored.
     * **eventCategory** `String` - Specifies the event category.
@@ -186,6 +186,15 @@ Example:
 	<li><a href="https://www.google.com/maps" target="_blank" data-track="footer,exit_link,ft_map">Find our store</a></li>
 	<li><a href="mailto:example@example.com" data-track="footer,email,ft_email">Email us</a></li>
 </ul>
+```
+
+### data-track-async="*eventCategory, eventAction, [eventLabel], [eventValue]*"
+
+Acts identical to [`data-track`](#data-attribute) except that `GAHelper` does not wait for the hit to register before allowing the default element behavior. Helpful when developing [single page applications](https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications).
+
+Example:
+```html
+<a href="#" data-track-async="footer,buy,ft_buy">Buy now</a></li>
 ```
 
 ## License
