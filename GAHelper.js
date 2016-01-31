@@ -41,13 +41,16 @@
 		
 		pub.pageview = function(fieldsObject) {
 			var callback;
+			var command;
 			
 			fieldsObject         = fieldsObject || {};
 			fieldsObject.hitType = 'pageview';
 			
+			command = getNamedCommand('set', fieldsObject);
+			
 			if ( ! fieldsObject.page && ! fieldsObject.location) {
-				getGA()(getNamedCommand('set'), 'location', window.location.toString());
-				getGA()(getNamedCommand('set'), 'page', window.location.pathname.toString());
+				getGA()(command, 'location', window.location.toString());
+				getGA()(command, 'page', window.location.pathname.toString());
 			}
 			
 			if (fieldsObject.clearUTM) {
@@ -107,7 +110,7 @@
 			}
 			
 			if (pub.forceTry || pub.isLoaded() || pub.isDefined() && fieldsObject.hitType === 'pageview') {
-				getGA()(getNamedCommand('send'), fieldsObject);
+				getGA()(getNamedCommand('send', fieldsObject), fieldsObject);
 			} else if (fieldsObject.hitCallback) {
 				fieldsObject.hitCallback(false);
 			}
@@ -154,9 +157,11 @@
 			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/g, '');
 		};
 		
-		var getNamedCommand = function(command) {
-			if (typeof pub.trackerName === 'string') {
-				var name = trim(pub.trackerName);
+		var getNamedCommand = function(command, fieldsObject) {
+			var name = fieldsObject.name || pub.trackerName;
+			
+			if (typeof name === 'string') {
+				name = trim(name);
 				
 				if (name !== '') {
 					return name + '.' + command;
