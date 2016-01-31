@@ -172,24 +172,35 @@
 				return $this.prop('tagName').toLowerCase() === 'form';
 			};
 			
-			$doc.on('click', '[data-track]', function(e) {
-				var $this = $(this);
+			$doc.on('mousedown', '[data-track]', function(e) {
+				var $this     = $(this);
+				var eventName = 'click.GAHelperClick';
 				
-				if ( ! isForm($this)) {
-					var href         = $this.attr('href');
-					var target       = $this.attr('target');
-					var isBlank      = target && target.toLowerCase() === '_blank';
-					var fieldsObject = getEventFieldsFromAttr($this);
-					
-					if (href && ! isBlank) {
-						e.preventDefault();
+				if (e.which === 1 && ! (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey)) {
+					$this.off(eventName).on(eventName, function(e) {
+						var $this = $(this);
 						
-						fieldsObject.hitCallback = function() {
-							document.location = href;
-						};
-					}
-					
-					pub.event(fieldsObject);
+						if ( ! isForm($this)) {
+							var href         = $this.attr('href');
+							var target       = $this.attr('target');
+							var isBlank      = target && target.toLowerCase() === '_blank';
+							var fieldsObject = getEventFieldsFromAttr($this);
+							
+							if (href && ! isBlank) {
+								e.preventDefault();
+								
+								fieldsObject.hitCallback = function() {
+									document.location = href;
+								};
+							}
+							
+							pub.event(fieldsObject);
+						}
+					});
+				} else {
+					$this.off(eventName).on(eventName, function() {
+						async.call(this);
+					});
 				}
 			});
 			
