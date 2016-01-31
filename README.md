@@ -49,6 +49,8 @@ $('#logo').click(function() {
 
 ## API
 
+*Note: Methods can be mixed and matched with their native GA counterparts. You only need to use the methods you find helpful.*
+
 ### Properties
 
 * **GAHelper.forceTry** `Boolean` - Specifies if `GAHelper` should attempt to [register event hits](#event) regardless if GA has loaded `true`, or not to attempt `false`; defaults to `false`.
@@ -132,7 +134,7 @@ Example:
 
 ### GAHelper.send(*fieldsObject*)
 
-Sends a hit to Google Analytics. Most likely you will want to use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track "social" or "timing" hit types. This method returns the instance of `GAHelper` to allow for method chaining.
+Sends a hit to Google Analytics. Typically you will use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track "social" or "timing" hit types. This method returns the instance of `GAHelper` to allow for method chaining.
 
 * **fieldsObject** `Object` - A [field object](https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference) that defines the hit type and fields.
 
