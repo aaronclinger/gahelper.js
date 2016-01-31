@@ -8,10 +8,11 @@
 	'use strict';
 	
 	function GAHelper() {
-		var pub       = {};
-		var firstView = true;
-		pub.forceTry  = false;
-		pub.timeout   = 3000;
+		var pub         = {};
+		var firstView   = true;
+		pub.forceTry    = false;
+		pub.timeout     = 3000;
+		pub.trackerName = null;
 		
 		
 		pub.create = function(fieldsObject) {
@@ -23,6 +24,12 @@
 				fieldsObject = {
 					trackingId: fieldsObject
 				};
+			}
+			
+			if (fieldsObject.name) {
+				pub.trackerName = fieldsObject.name = trim(fieldsObject.name);
+			} else if (typeof pub.trackerName === 'string') {
+				fieldsObject.name = trim(pub.trackerName);
 			}
 			
 			fieldsObject.cookieDomain = fieldsObject.cookieDomain || 'auto';
@@ -39,8 +46,8 @@
 			fieldsObject.hitType = 'pageview';
 			
 			if ( ! fieldsObject.page && ! fieldsObject.location) {
-				getGA()('set', 'location', window.location.toString());
-				getGA()('set', 'page', window.location.pathname.toString());
+				getGA()(getNamedCommand('set'), 'location', window.location.toString());
+				getGA()(getNamedCommand('set'), 'page', window.location.pathname.toString());
 			}
 			
 			if (fieldsObject.clearUTM) {
@@ -100,7 +107,7 @@
 			}
 			
 			if (pub.forceTry || pub.isLoaded() || pub.isDefined() && fieldsObject.hitType === 'pageview') {
-				getGA()('send', fieldsObject);
+				getGA()(getNamedCommand('send'), fieldsObject);
 			} else if (fieldsObject.hitCallback) {
 				fieldsObject.hitCallback(false);
 			}
@@ -145,6 +152,18 @@
 		
 		var trim = function(str) {
 			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/g, '');
+		};
+		
+		var getNamedCommand = function(command) {
+			if (typeof pub.trackerName === 'string') {
+				var name = trim(pub.trackerName);
+				
+				if (name !== '') {
+					return name + '.' + command;
+				}
+			}
+			
+			return command;
 		};
 		
 		var getEventFieldsFromAttr = function($el) {
