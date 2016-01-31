@@ -8,10 +8,11 @@
 	'use strict';
 	
 	function GAHelper() {
-		var pub       = {};
-		var firstView = true;
-		pub.forceTry  = false;
-		pub.timeout   = 3000;
+		var pub         = {};
+		var firstView   = true;
+		pub.forceTry    = false;
+		pub.timeout     = 3000;
+		pub.trackerName = null;
 		
 		
 		pub.create = function(fieldsObject) {
@@ -25,6 +26,12 @@
 				};
 			}
 			
+			if (fieldsObject.name) {
+				pub.trackerName = fieldsObject.name = trim(fieldsObject.name);
+			} else if (typeof pub.trackerName === 'string') {
+				fieldsObject.name = trim(pub.trackerName);
+			}
+			
 			fieldsObject.cookieDomain = fieldsObject.cookieDomain || 'auto';
 			
 			getGA()('create', fieldsObject);
@@ -34,13 +41,16 @@
 		
 		pub.pageview = function(fieldsObject) {
 			var callback;
+			var command;
 			
 			fieldsObject         = fieldsObject || {};
 			fieldsObject.hitType = 'pageview';
 			
+			command = getNamedCommand('set', fieldsObject);
+			
 			if ( ! fieldsObject.page && ! fieldsObject.location) {
-				getGA()('set', 'location', window.location.toString());
-				getGA()('set', 'page', window.location.pathname.toString());
+				getGA()(command, 'location', window.location.toString());
+				getGA()(command, 'page', window.location.pathname.toString());
 			}
 			
 			if (fieldsObject.clearUTM) {
@@ -100,7 +110,7 @@
 			}
 			
 			if (pub.forceTry || pub.isLoaded() || pub.isDefined() && fieldsObject.hitType === 'pageview') {
-				getGA()('send', fieldsObject);
+				getGA()(getNamedCommand('send', fieldsObject), fieldsObject);
 			} else if (fieldsObject.hitCallback) {
 				fieldsObject.hitCallback(false);
 			}
@@ -145,6 +155,20 @@
 		
 		var trim = function(str) {
 			return str.replace(/^[ \t\n\r]+|[ \t\n\r]+$/g, '');
+		};
+		
+		var getNamedCommand = function(command, fieldsObject) {
+			var name = fieldsObject.name || pub.trackerName;
+			
+			if (typeof name === 'string') {
+				name = trim(name);
+				
+				if (name !== '') {
+					return name + '.' + command;
+				}
+			}
+			
+			return command;
 		};
 		
 		var getEventFieldsFromAttr = function($el) {

@@ -59,6 +59,8 @@ $('#logo').click(function() {
 
 * **GAHelper.timeout** `Number` - The time, in milliseconds, for the tracking hit to register before assuming it failed; defaults to `3000`.
 
+* **GAHelper.trackerName** `String` - Name of the tracker object. By defining the tracker name here, or by defining `fieldsObject.name` to [`GAHelper.create`](#create), all [`GAHelper.pageview`](#pageview), [`GAHelper.event`](#event), and [`GAHelper.send`](#send) calls will automatically be prefixed/namespaced with the tracker name.
+
 ### <a id="create"></a>GAHelper.create(*trackingId* || *fieldsObject*)
 
 Creates a new tracker instance and will include the Google Analytics base code if it is [not present](#is-defined) on the page. This method returns the instance of `GAHelper` to allow for method chaining.
@@ -132,7 +134,7 @@ Example:
 });
 ```
 
-### GAHelper.send(*fieldsObject*)
+### <a id="send"></a>GAHelper.send(*fieldsObject*)
 
 Sends a hit to Google Analytics. Typically you will use [`GAHelper.pageview`](#pageview) or [`GAHelper.event`](#event), but `GAHelper.send` is exposed if you wish to track "social" or "timing" hit types. This method returns the instance of `GAHelper` to allow for method chaining.
 
