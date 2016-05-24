@@ -1,5 +1,4 @@
 /* jshint strict: true, browser: true, nonbsp: true, bitwise: true, immed: true, latedef: true, eqeqeq: true, undef: true, curly: true, unused: true */
-/* global jQuery */
 
 /**
  * @author Aaron Clinger - https://github.com/aaronclinger/gahelper.js
@@ -269,4 +268,4 @@
 	}
 	
 	window.GAHelper = new GAHelper();
-}(jQuery, window, document));
+}(window.jQuery, window, document));
