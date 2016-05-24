@@ -268,4 +268,4 @@
 	}
 	
 	window.GAHelper = new GAHelper();
-}(window.jQuery || null, window, document));
+}(window.jQuery, window, document));
