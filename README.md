@@ -3,7 +3,7 @@
 An utility which makes common tracking tasks with Google Analytics more reliable and less error-prone:
 
 * Ensures tracking features, such as `hitCallback`, work regardless if GA is loaded or is blocked by an ad blocker.
-* Automatically tracks events on elements with the data attribute `data-track` and attempts to register the hit before the page is redirected.
+* Automatically tracks events on HTML elements with the data attribute `data-track` and attempts to register the hit before the page is redirected.
 * Can remove UTM parameters from from the URL after their values have registered.
 * `GAHelper` will include Google Analytics base code if it is not present on the page.
 * Includes a configurable timeout for the tracking hit to register before gracefully failing.
@@ -47,7 +47,7 @@ $('#logo').click(function() {
 });
 ```
 
-## API
+## Documentation
 
 *Note: Methods can be mixed and matched with their native GA counterparts. You only need to use the methods you find helpful.*
 
@@ -175,7 +175,7 @@ Determines if the Google Analytics asynchronous script has loaded `true`, or is 
 
 ### <a id="data-attribute"></a>data-track="*eventCategory, eventAction, [eventLabel], [eventValue]*"
 
-`GAHelper` will detect elements with the data attribute `data-track` and automatically send the defined value to `GAHelper.event` when the element is clicked or the form is submitted. `GAHelper` will attempt to register the hit before the page is redirected.
+`GAHelper` will detect HTML elements with the data attribute `data-track` and automatically send the defined value to `GAHelper.event` when the element is clicked or the form is submitted. `GAHelper` will attempt to register the hit before the page is redirected.
 
 * **track** `String` - A comma-separated `String` that defines the `event` hit. Whitespace before and after commas is trimmed and ignored.
     * **eventCategory** `String` - Specifies the event category.
