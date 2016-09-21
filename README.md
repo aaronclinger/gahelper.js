@@ -1,6 +1,6 @@
 # GAHelper.js
 
-An utility which makes common tracking tasks with Google Analytics more reliable and less error-prone:
+A utility which makes common tracking tasks with Google Analytics more reliable and less error-prone:
 
 * Ensures tracking features, such as `hitCallback`, work regardless if GA is loaded or is blocked by an ad blocker.
 * Automatically tracks events on HTML elements with the data attribute `data-track` and attempts to register the hit before the page is redirected.
