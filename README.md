@@ -57,7 +57,7 @@ $('#logo').click(function() {
     * This flag is designed to speed up the calling of `hitCallback` in the event that GA has been blocked by an ad blocker.
     * [Page views](#pageview) are always attempted regardless of GA load status as page views are often requested immediately after the GA base code and before the asynchronous script has loaded.
 
-* **GAHelper.timeout** `Number` - The time, in milliseconds, for the tracking hit to register before assuming it failed; defaults to `3000`.
+* **GAHelper.timeout** `Number` - The time, in milliseconds, for the tracking hit to register before assuming it failed; defaults to `2000`.
 
 * **GAHelper.trackerName** `String` - Name of the tracker object. By defining the tracker name here, or by defining `fieldsObject.name` to [`GAHelper.create`](#create), all [`GAHelper.pageview`](#pageview), [`GAHelper.event`](#event), and [`GAHelper.send`](#send) calls will automatically be prefixed/namespaced with the tracker name.
 

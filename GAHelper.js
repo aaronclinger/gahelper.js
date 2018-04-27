@@ -10,7 +10,7 @@
 		var pub         = {};
 		var firstView   = true;
 		pub.forceTry    = false;
-		pub.timeout     = 3000;
+		pub.timeout     = 2000;
 		pub.trackerName = null;
 		
 		
