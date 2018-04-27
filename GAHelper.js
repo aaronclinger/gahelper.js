@@ -119,13 +119,13 @@
 		
 		pub.clearUTM = function() {
 			var loc     = window.location.toString();
-			var hasPush = history && 'pushState' in history;
+			var hasPush = ('history' in window) && ('pushState' in window.history);
 			
 			if (hasPush && loc.indexOf('?') !== -1) {
 				loc = loc.replace(/utm_(?:source|medium|term|content|campaign)=[^\&#]+\&*/ig, '');
 				loc = loc.replace(/(\?|\&)+(?=$|#)/g, '');
 				
-				history.replaceState({}, '', loc);
+				window.history.replaceState({}, '', loc);
 			}
 			
 			return pub;
