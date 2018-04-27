@@ -122,8 +122,8 @@
 			var hasPush = history && 'pushState' in history;
 			
 			if (hasPush && loc.indexOf('?') !== -1) {
-				loc = loc.replace(/utm_(?:source|medium|term|content|campaign)=[^\&]+\&*/ig, '');
-				loc = loc.replace(/(\?|\&)+$/g, '');
+				loc = loc.replace(/utm_(?:source|medium|term|content|campaign)=[^\&#]+\&*/ig, '');
+				loc = loc.replace(/(\?|\&)+(?=$|#)/g, '');
 				
 				history.replaceState({}, '', loc);
 			}
