@@ -7,11 +7,12 @@
 	'use strict';
 	
 	function GAHelper() {
-		var pub         = {};
-		var firstView   = true;
-		pub.forceTry    = false;
-		pub.timeout     = 2000;
-		pub.trackerName = null;
+		var pub            = {};
+		var firstPageview  = true;
+		var supportsBeacon = ('navigator' in window) && ('sendBeacon' in window.navigator);
+		pub.forceTry       = false;
+		pub.timeout        = 2000;
+		pub.trackerName    = null;
 		
 		
 		pub.create = function(fieldsObject) {
@@ -53,9 +54,9 @@
 			}
 			
 			if (fieldsObject.clearUTM) {
-				if (firstView) {
-					firstView = false;
-					callback  = fieldsObject.hitCallback;
+				if (firstPageview) {
+					firstPageview = false;
+					callback      = fieldsObject.hitCallback;
 					
 					fieldsObject.hitCallback = function(success) {
 						pub.clearUTM();
@@ -106,6 +107,10 @@
 				delay = setTimeout(function() {
 					fallback(false);
 				}, pub.timeout);
+			}
+			
+			if ( ! fieldsObject.transport && supportsBeacon) {
+				fieldsObject.transport = 'beacon';
 			}
 			
 			if (pub.forceTry || pub.isLoaded() || pub.isDefined() && fieldsObject.hitType === 'pageview') {
@@ -209,7 +214,7 @@
 							var isBlank      = target && target.toLowerCase() === '_blank';
 							var fieldsObject = getEventFieldsFromAttr($this);
 							
-							if (href && ! isBlank) {
+							if (href && ! isBlank && ! supportsBeacon) {
 								e.preventDefault();
 								
 								fieldsObject.hitCallback = function() {
@@ -232,21 +237,21 @@
 				var submit = false;
 				
 				$this.submit(function(e) {
-					if (submit === true) {
-						return;
-					}
-					
-					var fieldsObject = getEventFieldsFromAttr($this);
-					
-					fieldsObject.hitCallback = function() {
-						submit = true;
+					if ( ! submit) {
+						var fieldsObject = getEventFieldsFromAttr($this);
 						
-						$this.submit();
-					};
-					
-					pub.event(fieldsObject);
-					
-					e.preventDefault();
+						if ( ! supportsBeacon) {
+							e.preventDefault();
+							
+							fieldsObject.hitCallback = function() {
+								submit = true;
+								
+								$this.submit();
+							};
+						}
+						
+						pub.event(fieldsObject);
+					}
 				});
 			});
 			
