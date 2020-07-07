@@ -3,17 +3,12 @@
 A utility which makes common tracking tasks with Google Analytics more reliable and less error-prone:
 
 * Ensures tracking features, such as `hitCallback`, work regardless if GA is loaded or is blocked by an ad blocker.
-* Automatically tracks events on HTML elements with the data attribute `data-track` and attempts to register the hit before the page is redirected.
+* Can automatically track events on HTML elements with the data attribute `data-track` and attempt to register the hit before the page is redirected.
 * Can remove UTM parameters from from the URL after their values have registered.
 * `GAHelper` will include Google Analytics base code if it is not present on the page.
 * Includes a configurable timeout for the tracking hit to register before gracefully failing.
 * `GAHelper`’s methods can be mixed and matched with their native GA counterparts.
 * Handles setting `page` and `location` variables to ensure proper page tracking with [single page applications](https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications).
-
-
-## Dependencies
-
-`GAHelper` requires the presence of [jQuery](http://jquery.com) for [data attribute event tracking](#data-attribute). If jQuery is not present, `GAHelper` will automatically disable this feature. If you do not wish to include jQuery in your project, but want data attribute event tracking, it should be fairly trivial to change the few dependences.
 
 
 ## Example Usage
@@ -154,6 +149,11 @@ GAHelper.send({
 	}
 });
 ```
+### <a id="init-attribute"></a>GAHelper.initAttributeTracking()
+
+Sets up [attribute tracking](#data-attribute) by adding events to the `document` to listen for interactions on HTML elements with the data attribute `data-track`. Only needs to be called once per page load.
+
+This method returns the instance of `GAHelper` to allow for method chaining.
 
 ### <a id="clear-utm"></a>GAHelper.clearUTM()
 
@@ -183,6 +183,8 @@ Determines if the Google Analytics asynchronous script has loaded `true`, or is 
     * **[eventLabel]** `String` - Specifies the optional event label.
     * **[eventValue]** `Number` - Specifies the optional event value
 
+*Note: Before data attributes will automatically track, you need to initialize the listeners by calling [GAHelper.initAttributeTracking()](#init-attribute).*
+
 Example:
 ```html
 <ul>
@@ -195,6 +197,8 @@ Example:
 ### data-track-async="*eventCategory, eventAction, [eventLabel], [eventValue]*"
 
 Acts identical to [`data-track`](#data-attribute) except that `GAHelper` does not wait for the hit to register before allowing the default element behavior. Helpful when developing [single page applications](https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications).
+
+*Note: Before data attributes will automatically track, you need to initialize the listeners by calling [GAHelper.initAttributeTracking()](#init-attribute).*
 
 Example:
 ```html
