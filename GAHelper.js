@@ -3,13 +3,14 @@
 /**
  * @author Aaron Clinger - https://github.com/aaronclinger/gahelper.js
  */
-(function($, window, document) {
+(function(window, document) {
 	'use strict';
 	
 	function GAHelper() {
 		var pub            = {};
 		var firstPageview  = true;
 		var supportsBeacon = ('navigator' in window) && ('sendBeacon' in window.navigator);
+		var attributeTrack = false;
 		pub.forceTry       = false;
 		pub.timeout        = 2000;
 		pub.trackerName    = null;
@@ -122,6 +123,22 @@
 			return pub;
 		};
 		
+		pub.initAttributeTracking = function() {
+			if (attributeTrack) {
+				return pub;
+			}
+			
+			attributeTrack = true;
+			
+			if (document.readyState === 'interactive' || document.readyState === 'complete') {
+				addAttributeEvents();
+			} else {
+				document.addEventListener('DOMContentLoaded', addAttributeEvents);
+			}
+			
+			return pub;
+		};
+		
 		pub.clearUTM = function() {
 			var loc     = window.location.toString();
 			var hasPush = ('history' in window) && ('pushState' in window.history);
@@ -175,9 +192,14 @@
 			return command;
 		};
 		
-		var getEventFieldsFromAttr = function($el) {
+		var getEventFieldsFromAttribute = function(el) {
+			var attr = el.getAttribute('data-track') || el.getAttribute('data-track-async');
+			
+			if (attr === null || attr === '') {
+				return {};
+			}
+			
 			var fieldsObject = {};
-			var attr         = $el.data('track') || $el.data('track-async');
 			var values       = attr.split(',');
 			var keys         = ['eventCategory', 'eventAction', 'eventLabel', 'eventValue'];
 			var l            = Math.min(4, values.length);
@@ -189,88 +211,87 @@
 			return fieldsObject;
 		};
 		
-		var init = function() {
-			var $doc = $(document);
-			
-			var async = function() {
-				pub.event(getEventFieldsFromAttr($(this)));
-			};
-			
-			var isForm = function($this) {
-				return $this.prop('tagName').toLowerCase() === 'form';
-			};
-			
-			$doc.on('mousedown', '[data-track]', function(e) {
-				var $this     = $(this);
-				var eventName = 'click.GAHelperClick';
-				
-				if (e.which === 1 && ! (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey)) {
-					$this.off(eventName).on(eventName, function(e) {
-						var $this = $(this);
-						
-						if ( ! isForm($this)) {
-							var href         = $this.attr('href');
-							var target       = $this.attr('target');
-							var isBlank      = target && target.toLowerCase() === '_blank';
-							var fieldsObject = getEventFieldsFromAttr($this);
-							
-							if (href && ! isBlank && ! supportsBeacon) {
-								e.preventDefault();
-								
-								fieldsObject.hitCallback = function() {
-									document.location = href;
-								};
-							}
-							
-							pub.event(fieldsObject);
-						}
-					});
-				} else {
-					$this.off(eventName).on(eventName, function() {
-						async.call(this);
-					});
-				}
-			});
-			
-			$('form[data-track]').each(function() {
-				var $this  = $(this);
-				var submit = false;
-				
-				$this.submit(function(e) {
-					if ( ! submit) {
-						var fieldsObject = getEventFieldsFromAttr($this);
-						
-						if ( ! supportsBeacon) {
-							e.preventDefault();
-							
-							fieldsObject.hitCallback = function() {
-								submit = true;
-								
-								$this.submit();
-							};
-						}
-						
-						pub.event(fieldsObject);
-					}
-				});
-			});
-			
-			$doc.on('submit', 'form[data-track-async]', async);
-			$doc.on('click', '[data-track-async]', function() {
-				if ( ! isForm($(this))) {
-					async.call(this);
-				}
-			});
+		var isForm = function(el) {
+			return el.tagName.toLowerCase() === 'form';
 		};
 		
-		if ($) {
-			$(document).ready(function() {
-				init();
+		var onRegularClick = function(e) {
+			var element = e.target;
+			
+			if ( ! isForm(element)) {
+				var href         = element.href;
+				var target       = element.target;
+				var isBlank      = target && target.toLowerCase() === '_blank';
+				var fieldsObject = getEventFieldsFromAttribute(element);
+				
+				if (href && ! isBlank && ! supportsBeacon) {
+					e.preventDefault();
+					
+					fieldsObject.hitCallback = function() {
+						document.location = href;
+					};
+				}
+				
+				pub.event(fieldsObject);
+			}
+			
+			element.removeEventListener('click', onRegularClick);
+		};
+		
+		var onAsyncClick = function(e) {
+			var element = e.target;
+			
+			pub.event(getEventFieldsFromAttribute(element));
+			
+			element.removeEventListener('click', onAsyncClick);
+		};
+		
+		var onFormSubmit = function(e) {
+			var element = e.target;
+			
+			if (element.getAttribute('data-track-async')) {
+				pub.event(getEventFieldsFromAttribute(element));
+			} else if (element.getAttribute('data-track')) {
+				var fieldsObject = getEventFieldsFromAttribute(element);
+				
+				if ( ! supportsBeacon) {
+					e.preventDefault();
+					
+					fieldsObject.hitCallback = function() {
+						document.removeEventListener('submit', onFormSubmit);
+						
+						element.submit();
+					};
+				}
+				
+				pub.event(fieldsObject);
+			}
+		};
+		
+		var addAttributeEvents = function() {
+			document.addEventListener('mousedown', function(e) {
+				var element = e.target;
+				
+				if (element.getAttribute('data-track')) {
+					var isAsync = e.which === 1 && (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey);
+					
+					element.addEventListener('click', isAsync ? onAsyncClick : onRegularClick);
+				}
 			});
-		}
+			
+			document.addEventListener('click', function(e) {
+				var element = e.target;
+				
+				if (element.getAttribute('data-track-async') && ! isForm(element)) {
+					pub.event(getEventFieldsFromAttribute(element));
+				}
+			});
+			
+			document.addEventListener('submit', onFormSubmit);
+		};
 		
 		return pub;
 	}
 	
 	window.GAHelper = new GAHelper();
-}(window.jQuery, window, document));
+}(window, document));
