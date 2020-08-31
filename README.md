@@ -28,7 +28,8 @@ A utility which makes common tracking tasks with Google Analytics more reliable 
 <a href="/more" data-track="footer,more,ft_more">Learn more</a>
 ```
 ```js
-$('#logo').click(function() {
+
+element.addEventListener('click', function() {
 	GAHelper.event({
 		eventCategory: 'header',
 		eventAction: 'nav_home',
